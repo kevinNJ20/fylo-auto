@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { sendEmailWebhook, sendContractWebhook } from '@/lib/make-webhook';
 
+// Configuration pour Vercel: durée maximale d'exécution (30 secondes)
+export const maxDuration = 30;
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2023-10-16',
 });
