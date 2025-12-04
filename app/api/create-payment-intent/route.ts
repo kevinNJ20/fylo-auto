@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const reservationId = uuidv4();
 
     // Calculer le montant (assurer que c'est en centimes)
-    const amount = reservationData.amount || 10000; // 100€ par défaut
+    const amount = reservationData.amount || 11000; // 110€ par défaut (montant fixe)
     const amountInCents = typeof amount === 'number' ? amount : parseInt(amount);
 
     // Créer le PaymentIntent

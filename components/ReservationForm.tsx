@@ -56,7 +56,7 @@ interface ReservationFormProps {
   defaultAmount?: number;
 }
 
-export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: ReservationFormProps) {
+export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: ReservationFormProps) {
   const [licenseFile, setLicenseFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasViolations, setHasViolations] = useState(false);
