@@ -15,10 +15,11 @@ export interface ReservationFormData {
   licenseIssueDate: string;
   licenseExpiryDate: string;
   licenseIssuingAuthority: string;
-  licenseFile?: File;
+  licenseFileRecto?: File;
+  licenseFileVerso?: File;
 
   // Informations ANTAI
-  licensePoints: number;
+  licensePoints?: number;
   hasViolations: boolean;
   violationsDetails?: string;
 

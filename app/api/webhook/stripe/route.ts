@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { sendEmailWebhook, sendContractWebhook } from '@/lib/make-webhook';
+import { getReservation, deleteReservation } from '@/lib/reservation-storage';
 
 // Configuration pour Vercel: durée maximale d'exécution (30 secondes)
 export const maxDuration = 30;
@@ -42,13 +43,24 @@ export async function POST(request: NextRequest) {
     const customerName = paymentIntent.metadata.customerName;
 
     try {
-      // TODO: Récupérer les données de réservation complètes depuis la base de données
-      // Pour l'instant, on utilise les métadonnées disponibles
-      const reservationData = {
-        email: customerEmail,
-        firstName: customerName.split(' ')[0] || '',
-        lastName: customerName.split(' ').slice(1).join(' ') || '',
-      };
+      // Récupérer les données de réservation complètes depuis le stockage temporaire
+      const storedReservation = reservationId ? getReservation(reservationId) : undefined;
+      
+      let reservationData: any;
+      if (storedReservation) {
+        reservationData = storedReservation.reservationData;
+      } else {
+        // Fallback si la réservation n'est pas trouvée (utiliser les métadonnées)
+        reservationData = {
+          email: customerEmail,
+          firstName: customerName.split(' ')[0] || '',
+          lastName: customerName.split(' ').slice(1).join(' ') || '',
+        };
+      }
+
+      // Récupérer les fichiers depuis le stockage temporaire
+      const licenseFileRecto = storedReservation?.licenseFileRecto;
+      const licenseFileVerso = storedReservation?.licenseFileVerso;
 
       // Envoyer l'email de confirmation via Make.com
       await sendEmailWebhook({
@@ -58,13 +70,24 @@ export async function POST(request: NextRequest) {
         reservationData: reservationData as any,
       });
 
-      // Envoyer le contrat via Make.com
+      // Envoyer le contrat via Make.com avec les fichiers du permis
       await sendContractWebhook({
         reservationId: reservationId || 'unknown',
         customerEmail: customerEmail || '',
         customerName: customerName || '',
         reservationData: reservationData as any,
+        licenseFileRectoBase64: licenseFileRecto?.base64,
+        licenseFileRectoName: licenseFileRecto?.name,
+        licenseFileRectoMimeType: licenseFileRecto?.mimeType,
+        licenseFileVersoBase64: licenseFileVerso?.base64,
+        licenseFileVersoName: licenseFileVerso?.name,
+        licenseFileVersoMimeType: licenseFileVerso?.mimeType,
       });
+
+      // Supprimer la réservation du stockage temporaire après envoi
+      if (reservationId) {
+        deleteReservation(reservationId);
+      }
 
       console.log(`Webhook traité avec succès pour la réservation ${reservationId}`);
     } catch (error: any) {

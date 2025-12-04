@@ -59,7 +59,11 @@ export const generateRentalContract = async (
   addText(`Date d'obtention: ${new Date(reservationData.licenseIssueDate).toLocaleDateString('fr-FR')}`);
   addText(`Date d'expiration: ${new Date(reservationData.licenseExpiryDate).toLocaleDateString('fr-FR')}`);
   addText(`Autorité émettrice: ${reservationData.licenseIssuingAuthority}`);
-  addText(`Points restants: ${reservationData.licensePoints}`);
+  if (reservationData.licensePoints !== undefined && reservationData.licensePoints !== null) {
+    addText(`Points restants: ${reservationData.licensePoints}`);
+  } else {
+    addText(`Points restants: Non applicable (permis étranger)`);
+  }
   yPosition += 5;
 
   // Section Réservation

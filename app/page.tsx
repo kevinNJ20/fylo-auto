@@ -14,21 +14,24 @@ export default function Home() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [reservationId, setReservationId] = useState<string | null>(null);
 
-  const handleFormSubmit = async (data: ReservationFormData, licenseFile: File | null) => {
+  const handleFormSubmit = async (data: ReservationFormData, licenseFileRecto: File | null, licenseFileVerso: File | null) => {
     try {
-      // Créer une FormData pour envoyer le fichier
+      // Créer une FormData pour envoyer les fichiers
       const formData = new FormData();
       
       // Convertir les données en JSON et les ajouter
       Object.entries(data).forEach(([key, value]) => {
-        if (key !== 'licenseFile' && value !== undefined) {
+        if (key !== 'licenseFileRecto' && key !== 'licenseFileVerso' && value !== undefined) {
           formData.append(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
         }
       });
 
-      // Ajouter le fichier si présent
-      if (licenseFile) {
-        formData.append('licenseFile', licenseFile);
+      // Ajouter les fichiers si présents
+      if (licenseFileRecto) {
+        formData.append('licenseFileRecto', licenseFileRecto);
+      }
+      if (licenseFileVerso) {
+        formData.append('licenseFileVerso', licenseFileVerso);
       }
 
       // Créer le PaymentIntent

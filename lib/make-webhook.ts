@@ -7,6 +7,12 @@ interface MakeWebhookPayload {
   customerName: string;
   reservationData: ReservationFormData;
   contractUrl?: string;
+  licenseFileRectoBase64?: string;
+  licenseFileRectoName?: string;
+  licenseFileRectoMimeType?: string;
+  licenseFileVersoBase64?: string;
+  licenseFileVersoName?: string;
+  licenseFileVersoMimeType?: string;
 }
 
 export const sendEmailWebhook = async (

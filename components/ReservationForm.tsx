@@ -26,7 +26,7 @@ const reservationSchema = z.object({
   licenseIssuingAuthority: z.string().min(2, 'Autorité émettrice requise'),
 
   // Informations ANTAI
-  licensePoints: z.number().min(0).max(12),
+  licensePoints: z.number().min(0).max(12).optional(),
   hasViolations: z.boolean(),
   violationsDetails: z.string().optional(),
 
@@ -52,12 +52,13 @@ const reservationSchema = z.object({
 type ReservationFormValues = z.infer<typeof reservationSchema>;
 
 interface ReservationFormProps {
-  onSubmit: (data: ReservationFormData, licenseFile: File | null) => Promise<void>;
+  onSubmit: (data: ReservationFormData, licenseFileRecto: File | null, licenseFileVerso: File | null) => Promise<void>;
   defaultAmount?: number;
 }
 
 export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: ReservationFormProps) {
-  const [licenseFile, setLicenseFile] = useState<File | null>(null);
+  const [licenseFileRecto, setLicenseFileRecto] = useState<File | null>(null);
+  const [licenseFileVerso, setLicenseFileVerso] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasViolations, setHasViolations] = useState(false);
 
@@ -83,9 +84,10 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
     try {
       const formData: ReservationFormData = {
         ...data,
-        licenseFile: licenseFile || undefined,
+        licenseFileRecto: licenseFileRecto || undefined,
+        licenseFileVerso: licenseFileVerso || undefined,
       };
-      await onSubmit(formData, licenseFile);
+      await onSubmit(formData, licenseFileRecto, licenseFileVerso);
     } catch (error) {
       console.error('Erreur lors de la soumission:', error);
       alert('Une erreur est survenue. Veuillez réessayer.');
@@ -94,9 +96,15 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileRectoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setLicenseFile(e.target.files[0]);
+      setLicenseFileRecto(e.target.files[0]);
+    }
+  };
+
+  const handleFileVersoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setLicenseFileVerso(e.target.files[0]);
     }
   };
 
@@ -290,16 +298,31 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Upload du permis de conduire (recto/verso) *
+              Upload du permis de conduire - Recto *
             </label>
             <input
               type="file"
               accept="image/*,.pdf"
-              onChange={handleFileChange}
+              onChange={handleFileRectoChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
-            {licenseFile && (
-              <p className="text-sm text-green-600 mt-1">Fichier sélectionné: {licenseFile.name}</p>
+            {licenseFileRecto && (
+              <p className="text-sm text-green-600 mt-1">Recto sélectionné: {licenseFileRecto.name}</p>
+            )}
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Upload du permis de conduire - Verso *
+            </label>
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleFileVersoChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
+            />
+            {licenseFileVerso && (
+              <p className="text-sm text-green-600 mt-1">Verso sélectionné: {licenseFileVerso.name}</p>
             )}
           </div>
         </div>
@@ -313,13 +336,14 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre de points restants *
+              Nombre de points restants (optionnel - permis étranger sans points)
             </label>
             <input
               type="number"
               min="0"
               max="12"
-              {...register('licensePoints', { valueAsNumber: true })}
+              {...register('licensePoints', { valueAsNumber: true, setValueAs: (v) => v === '' ? undefined : Number(v) })}
+              placeholder="Laisser vide si permis étranger"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.licensePoints && (
