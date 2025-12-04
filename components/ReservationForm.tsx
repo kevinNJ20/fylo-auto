@@ -112,7 +112,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             </label>
             <input
               {...register('firstName')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.firstName && (
               <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>
@@ -125,7 +125,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             </label>
             <input
               {...register('lastName')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.lastName && (
               <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>
@@ -139,7 +139,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               type="email"
               {...register('email')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
@@ -153,7 +153,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               type="tel"
               {...register('phone')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.phone && (
               <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
@@ -167,7 +167,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               type="date"
               {...register('dateOfBirth')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.dateOfBirth && (
               <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth.message}</p>
@@ -180,7 +180,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             </label>
             <input
               {...register('address')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.address && (
               <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
@@ -193,7 +193,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             </label>
             <input
               {...register('city')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.city && (
               <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>
@@ -206,7 +206,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             </label>
             <input
               {...register('postalCode')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.postalCode && (
               <p className="text-red-500 text-xs mt-1">{errors.postalCode.message}</p>
@@ -220,7 +220,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               {...register('country')}
               defaultValue="France"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.country && (
               <p className="text-red-500 text-xs mt-1">{errors.country.message}</p>
@@ -239,7 +239,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             </label>
             <input
               {...register('licenseNumber')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.licenseNumber && (
               <p className="text-red-500 text-xs mt-1">{errors.licenseNumber.message}</p>
@@ -253,7 +253,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               type="date"
               {...register('licenseIssueDate')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.licenseIssueDate && (
               <p className="text-red-500 text-xs mt-1">{errors.licenseIssueDate.message}</p>
@@ -267,7 +267,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               type="date"
               {...register('licenseExpiryDate')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.licenseExpiryDate && (
               <p className="text-red-500 text-xs mt-1">{errors.licenseExpiryDate.message}</p>
@@ -281,7 +281,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               {...register('licenseIssuingAuthority')}
               placeholder="Ex: Préfecture de Paris"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.licenseIssuingAuthority && (
               <p className="text-red-500 text-xs mt-1">{errors.licenseIssuingAuthority.message}</p>
@@ -296,7 +296,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
               type="file"
               accept="image/*,.pdf"
               onChange={handleFileChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {licenseFile && (
               <p className="text-sm text-green-600 mt-1">Fichier sélectionné: {licenseFile.name}</p>
@@ -320,7 +320,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
               min="0"
               max="12"
               {...register('licensePoints', { valueAsNumber: true })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.licensePoints && (
               <p className="text-red-500 text-xs mt-1">{errors.licensePoints.message}</p>
@@ -350,7 +350,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
                 {...register('violationsDetails')}
                 rows={4}
                 placeholder="Décrivez les contraventions reçues..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
               />
             </div>
           )}
@@ -369,7 +369,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
               type="date"
               {...register('startDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.startDate && (
               <p className="text-red-500 text-xs mt-1">{errors.startDate.message}</p>
@@ -384,7 +384,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
               type="date"
               {...register('endDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.endDate && (
               <p className="text-red-500 text-xs mt-1">{errors.endDate.message}</p>
@@ -398,7 +398,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               type="time"
               {...register('startTime')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.startTime && (
               <p className="text-red-500 text-xs mt-1">{errors.startTime.message}</p>
@@ -412,7 +412,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
             <input
               type="time"
               {...register('endTime')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {errors.endTime && (
               <p className="text-red-500 text-xs mt-1">{errors.endTime.message}</p>
@@ -427,7 +427,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 10000 }: Res
               {...register('specialRequests')}
               rows={3}
               placeholder="Options supplémentaires, équipements souhaités, etc."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
           </div>
         </div>
