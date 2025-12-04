@@ -6,13 +6,7 @@ interface MakeWebhookPayload {
   customerEmail: string;
   customerName: string;
   reservationData: ReservationFormData;
-  contractUrl?: string;
-  licenseFileRectoBase64?: string;
-  licenseFileRectoName?: string;
-  licenseFileRectoMimeType?: string;
-  licenseFileVersoBase64?: string;
-  licenseFileVersoName?: string;
-  licenseFileVersoMimeType?: string;
+  contractHTML: string; // Contrat HTML complet à envoyer par email
 }
 
 export const sendEmailWebhook = async (

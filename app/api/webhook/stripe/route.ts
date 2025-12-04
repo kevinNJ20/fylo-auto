@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { sendEmailWebhook, sendContractWebhook } from '@/lib/make-webhook';
 import { getReservation, deleteReservation } from '@/lib/reservation-storage';
+import { generateContractHTML } from '@/lib/contract-html';
 
 // Configuration pour Vercel: durée maximale d'exécution (30 secondes)
 export const maxDuration = 30;
@@ -58,9 +59,11 @@ export async function POST(request: NextRequest) {
         };
       }
 
-      // Récupérer les fichiers depuis le stockage temporaire
-      const licenseFileRecto = storedReservation?.licenseFileRecto;
-      const licenseFileVerso = storedReservation?.licenseFileVerso;
+      // Générer le contrat HTML
+      const contractHTML = generateContractHTML(
+        reservationData as any,
+        reservationId || 'unknown'
+      );
 
       // Envoyer l'email de confirmation via Make.com
       await sendEmailWebhook({
@@ -70,18 +73,13 @@ export async function POST(request: NextRequest) {
         reservationData: reservationData as any,
       });
 
-      // Envoyer le contrat via Make.com avec les fichiers du permis
+      // Envoyer le contrat HTML via Make.com
       await sendContractWebhook({
         reservationId: reservationId || 'unknown',
         customerEmail: customerEmail || '',
         customerName: customerName || '',
         reservationData: reservationData as any,
-        licenseFileRectoBase64: licenseFileRecto?.base64,
-        licenseFileRectoName: licenseFileRecto?.name,
-        licenseFileRectoMimeType: licenseFileRecto?.mimeType,
-        licenseFileVersoBase64: licenseFileVerso?.base64,
-        licenseFileVersoName: licenseFileVerso?.name,
-        licenseFileVersoMimeType: licenseFileVerso?.mimeType,
+        contractHTML: contractHTML,
       });
 
       // Supprimer la réservation du stockage temporaire après envoi
