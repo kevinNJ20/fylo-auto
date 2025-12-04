@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
     
     // Extraire les données du formulaire
     const reservationData: any = {};
-    const entries = formData.entries();
     
-    for (const [key, value] of entries) {
+    // Convertir FormData en objet
+    for (const [key, value] of Array.from(formData.entries())) {
       if (key !== 'licenseFile') {
         const stringValue = value.toString();
         // Essayer de parser comme JSON si possible
