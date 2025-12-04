@@ -4,11 +4,6 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
 }
 
 module.exports = nextConfig
