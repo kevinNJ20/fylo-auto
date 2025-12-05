@@ -1,6 +1,56 @@
-import PdfPrinter from 'pdfmake';
+import React from 'react';
+import { pdf } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { ReservationFormData } from '@/types/reservation';
-import { TDocumentDefinitions, Decoration, Margins } from 'pdfmake/interfaces';
+
+// Styles pour le PDF
+const styles = StyleSheet.create({
+  page: {
+    padding: 50,
+    fontSize: 11,
+    fontFamily: 'Helvetica',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 10,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textDecoration: 'underline',
+  },
+  text: {
+    fontSize: 11,
+    marginBottom: 5,
+  },
+  textBold: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  listItem: {
+    fontSize: 11,
+    marginBottom: 5,
+    marginLeft: 20,
+  },
+  signatureSection: {
+    marginTop: 20,
+  },
+  footer: {
+    fontSize: 9,
+    color: 'gray',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+});
 
 /**
  * Génère le contrat de location en PDF
@@ -22,283 +72,119 @@ export const generateContractPDF = async (
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
 
-  // Définir les polices (pdfmake utilise des polices intégrées)
-  const fonts = {
-    Roboto: {
-      normal: 'Helvetica',
-      bold: 'Helvetica-Bold',
-      italics: 'Helvetica-Oblique',
-      bolditalics: 'Helvetica-BoldOblique',
-    },
-  };
+  // Composant React pour le document PDF
+  const ContractDocument = () => (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.title}>CONTRAT DE LOCATION DE VÉHICULE</Text>
+        <Text style={styles.subtitle}>Numéro de réservation : {reservationId}</Text>
+        <Text style={styles.subtitle}>Date du contrat : {formatDate(new Date().toISOString())}</Text>
 
-  const printer = new PdfPrinter(fonts);
+        <Text style={styles.sectionTitle}>INFORMATIONS DU LOCATAIRE</Text>
+        <Text style={styles.text}>Nom complet : {reservationData.firstName} {reservationData.lastName}</Text>
+        <Text style={styles.text}>Email : {reservationData.email}</Text>
+        <Text style={styles.text}>Téléphone : {reservationData.phone}</Text>
+        <Text style={styles.text}>Date de naissance : {formatDate(reservationData.dateOfBirth)}</Text>
+        <Text style={styles.text}>Adresse : {reservationData.address}, {reservationData.postalCode} {reservationData.city}</Text>
+        <Text style={styles.text}>Pays : {reservationData.country}</Text>
 
-  // Définir le document PDF
-  const docDefinition: TDocumentDefinitions = {
-    pageSize: 'A4',
-    pageMargins: [50, 50, 50, 50],
-    content: [
-      // En-tête
-      {
-        text: 'CONTRAT DE LOCATION DE VÉHICULE',
-        fontSize: 20,
-        bold: true,
-        alignment: 'center',
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        text: `Numéro de réservation : ${reservationId}`,
-        fontSize: 10,
-        alignment: 'center',
-        margin: [0, 0, 0, 5] as Margins,
-      },
-      {
-        text: `Date du contrat : ${formatDate(new Date().toISOString())}`,
-        fontSize: 10,
-        alignment: 'center',
-        margin: [0, 0, 0, 20] as Margins,
-      },
+        <Text style={styles.sectionTitle}>INFORMATIONS PERMIS DE CONDUIRE</Text>
+        <Text style={styles.text}>Numéro de permis : {reservationData.licenseNumber}</Text>
+        <Text style={styles.text}>Date d'obtention : {formatDate(reservationData.licenseIssueDate)}</Text>
+        <Text style={styles.text}>Date d'expiration : {formatDate(reservationData.licenseExpiryDate)}</Text>
+        <Text style={styles.text}>Autorité émettrice : {reservationData.licenseIssuingAuthority}</Text>
+        <Text style={styles.text}>
+          Points restants : {reservationData.licensePoints !== undefined && reservationData.licensePoints !== null
+            ? reservationData.licensePoints
+            : 'Non applicable (permis étranger)'}
+        </Text>
 
-      // Informations du locataire
-      {
-        text: 'INFORMATIONS DU LOCATAIRE',
-        fontSize: 14,
-        bold: true,
-        decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        text: [
-          `Nom complet : ${reservationData.firstName} ${reservationData.lastName}\n`,
-          `Email : ${reservationData.email}\n`,
-          `Téléphone : ${reservationData.phone}\n`,
-          `Date de naissance : ${formatDate(reservationData.dateOfBirth)}\n`,
-          `Adresse : ${reservationData.address}, ${reservationData.postalCode} ${reservationData.city}\n`,
-          `Pays : ${reservationData.country}`,
-        ],
-        margin: [0, 0, 0, 15] as Margins,
-      },
+        <Text style={styles.sectionTitle}>INFORMATIONS DU VÉHICULE</Text>
+        <Text style={styles.text}>Marque et modèle : Peugeot 2008</Text>
+        <Text style={styles.text}>Année : 2019</Text>
+        <Text style={styles.text}>Plaque d'immatriculation : FG954MV</Text>
+        <Text style={styles.text}>Numéro de contrat d'assurance : 100029573215</Text>
 
-      // Informations permis de conduire
-      {
-        text: 'INFORMATIONS PERMIS DE CONDUIRE',
-        fontSize: 14,
-        bold: true,
-        decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        text: [
-          `Numéro de permis : ${reservationData.licenseNumber}\n`,
-          `Date d'obtention : ${formatDate(reservationData.licenseIssueDate)}\n`,
-          `Date d'expiration : ${formatDate(reservationData.licenseExpiryDate)}\n`,
-          `Autorité émettrice : ${reservationData.licenseIssuingAuthority}\n`,
-          reservationData.licensePoints !== undefined && reservationData.licensePoints !== null
-            ? `Points restants : ${reservationData.licensePoints}`
-            : `Points restants : Non applicable (permis étranger)`,
-        ],
-        margin: [0, 0, 0, 15] as Margins,
-      },
+        <Text style={styles.sectionTitle}>DÉTAILS DE LA LOCATION</Text>
+        <Text style={styles.text}>
+          Période : Du {formatDateShort(reservationData.startDate)} au {formatDateShort(reservationData.endDate)}
+        </Text>
+        <Text style={styles.text}>Heures : De {reservationData.startTime} à {reservationData.endTime}</Text>
+        {reservationData.vehicleType && (
+          <Text style={styles.text}>Type de véhicule : {reservationData.vehicleType}</Text>
+        )}
 
-      // Informations du véhicule
-      {
-        text: 'INFORMATIONS DU VÉHICULE',
-        fontSize: 14,
-        bold: true,
-        decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        text: [
-          `Marque et modèle : Peugeot 2008\n`,
-          `Année : 2019\n`,
-          `Plaque d'immatriculation : FG954MV\n`,
-          `Numéro de contrat d'assurance : 100029573215`,
-        ],
-        margin: [0, 0, 0, 15] as Margins,
-      },
+        <Text style={styles.sectionTitle}>INFORMATIONS DE PAIEMENT</Text>
+        <Text style={styles.text}>
+          Montant total : {reservationData.amount.toFixed(2)} {reservationData.currency.toUpperCase()}
+        </Text>
+        <Text style={styles.text}>Méthode de paiement : Paiement en espèces, PayPal ou Wero à la remise des clés.</Text>
 
-      // Détails de la location
-      {
-        text: 'DÉTAILS DE LA LOCATION',
-        fontSize: 14,
-        bold: true,
-        decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        text: [
-          `Période : Du ${formatDateShort(reservationData.startDate)} au ${formatDateShort(reservationData.endDate)}\n`,
-          `Heures : De ${reservationData.startTime} à ${reservationData.endTime}`,
-          ...(reservationData.vehicleType ? [`\nType de véhicule : ${reservationData.vehicleType}`] : []),
-        ],
-        margin: [0, 0, 0, 15] as Margins,
-      },
+        {reservationData.specialRequests && (
+          <>
+            <Text style={styles.sectionTitle}>DEMANDES SPÉCIALES</Text>
+            <Text style={styles.text}>{reservationData.specialRequests}</Text>
+          </>
+        )}
 
-      // Informations de paiement
-      {
-        text: 'INFORMATIONS DE PAIEMENT',
-        fontSize: 14,
-        bold: true,
-        decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        text: [
-          `Montant total : ${reservationData.amount.toFixed(2)} ${reservationData.currency.toUpperCase()}\n`,
-          `Méthode de paiement : Paiement en espèces, PayPal ou Wero à la remise des clés.`,
-        ],
-        margin: [0, 0, 0, 15] as Margins,
-      },
+        <Text style={styles.sectionTitle}>CONDITIONS GÉNÉRALES ET ENGAGEMENTS</Text>
+        <Text style={styles.listItem}>
+          1. Le locataire s'engage à utiliser le véhicule conformément au code de la route et aux lois en vigueur.
+        </Text>
+        <Text style={styles.listItem}>
+          2. Le locataire s'engage à remettre le véhicule en état comme il l'a pris au début de la location.
+        </Text>
+        <Text style={styles.listItem}>
+          3. Le locataire est responsable de toutes les contraventions qui pourraient survenir durant la période de location et s'engage à procéder à la désignation du conducteur conformément aux informations fournies.
+        </Text>
+        <Text style={styles.listItem}>
+          4. Le locataire est responsable de tous les dégâts, pertes ou vols qui pourraient avoir lieu durant la période de location.
+        </Text>
+        <Text style={styles.listItem}>
+          5. En cas de contravention, la désignation du conducteur sera effectuée conformément aux informations fournies lors de la réservation (numéro de permis, informations personnelles, copies du permis de conduire).
+        </Text>
+        <Text style={styles.listItem}>
+          6. L'assurance du véhicule est en vigueur selon les termes du contrat d'assurance.
+        </Text>
 
-      // Demandes particulières
-      ...(reservationData.specialRequests
-        ? [
-            {
-              text: 'DEMANDES SPÉCIALES',
-              fontSize: 14,
-              bold: true,
-              decoration: 'underline' as Decoration,
-              margin: [0, 0, 0, 10] as Margins,
-            },
-            {
-              fontSize: 11,
-              text: reservationData.specialRequests,
-              margin: [0, 0, 0, 15] as Margins,
-            },
-          ]
-        : []),
+        {reservationData.acceptsResponsibility && (
+          <>
+            <Text style={[styles.textBold, { color: 'blue', marginTop: 10 }]}>✓ Acceptation des conditions</Text>
+            <Text style={styles.text}>
+              Le locataire a accepté et signé numériquement ces conditions lors de la réservation le{' '}
+              {formatDate(new Date().toISOString())}.
+            </Text>
+          </>
+        )}
 
-      // Conditions générales
-      {
-        text: 'CONDITIONS GÉNÉRALES ET ENGAGEMENTS',
-        fontSize: 14,
-        bold: true,
-        decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        ol: [
-          "Le locataire s'engage à utiliser le véhicule conformément au code de la route et aux lois en vigueur.",
-          "Le locataire s'engage à remettre le véhicule en état comme il l'a pris au début de la location.",
-          "Le locataire est responsable de toutes les contraventions qui pourraient survenir durant la période de location et s'engage à procéder à la désignation du conducteur conformément aux informations fournies.",
-          "Le locataire est responsable de tous les dégâts, pertes ou vols qui pourraient avoir lieu durant la période de location.",
-          "En cas de contravention, la désignation du conducteur sera effectuée conformément aux informations fournies lors de la réservation (numéro de permis, informations personnelles, copies du permis de conduire).",
-          "L'assurance du véhicule est en vigueur selon les termes du contrat d'assurance.",
-        ],
-        margin: [0, 0, 0, 15] as Margins,
-      },
+        <View style={styles.signatureSection}>
+          <Text style={styles.sectionTitle}>SIGNATURES</Text>
+          <Text style={styles.text}>Locataire :</Text>
+          <Text style={styles.text}>Nom : {reservationData.firstName} {reservationData.lastName}</Text>
+          <Text style={styles.text}>Date : {formatDate(new Date().toISOString())}</Text>
+          <Text style={styles.text}>Signature : ___________________</Text>
 
-      // Acceptation des conditions
-      ...(reservationData.acceptsResponsibility
-        ? [
-            {
-              text: '✓ Acceptation des conditions',
-              fontSize: 11,
-              bold: true,
-              color: 'blue',
-              margin: [0, 0, 0, 5] as Margins,
-            },
-            {
-              fontSize: 11,
-              text: `Le locataire a accepté et signé numériquement ces conditions lors de la réservation le ${formatDate(new Date().toISOString())}.`,
-              margin: [0, 0, 0, 15] as Margins,
-            },
-          ]
-        : []),
+          <Text style={[styles.text, { marginTop: 20 }]}>Propriétaire :</Text>
+          <Text style={styles.text}>Nom : JAMEIN NJUNDJA Kevin</Text>
+          <Text style={styles.text}>Date : {formatDate(new Date().toISOString())}</Text>
+          <Text style={styles.text}>Signature : ___________________</Text>
+        </View>
 
-      // Signatures
-      {
-        text: 'SIGNATURES',
-        fontSize: 14,
-        bold: true,
-        decoration: 'underline' as Decoration,
-        margin: [0, 20, 0, 10] as Margins,
-      },
-      {
-        text: 'Locataire :',
-        fontSize: 11,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        text: [
-          `Nom : ${reservationData.firstName} ${reservationData.lastName}\n`,
-          `Date : ${formatDate(new Date().toISOString())}`,
-        ],
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        text: 'Signature : ___________________',
-        fontSize: 11,
-        margin: [0, 0, 0, 20] as Margins,
-      },
-      {
-        text: 'Propriétaire :',
-        fontSize: 11,
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        fontSize: 11,
-        text: [
-          `Nom : JAMEIN NJUNDJA Kevin\n`,
-          `Date : ${formatDate(new Date().toISOString())}`,
-        ],
-        margin: [0, 0, 0, 10] as Margins,
-      },
-      {
-        text: 'Signature : ___________________',
-        fontSize: 11,
-        margin: [0, 0, 0, 20] as Margins,
-      },
+        <Text style={styles.footer}>
+          Ce document fait office de contrat de location. Veuillez le conserver pour vos archives.
+        </Text>
+        <Text style={styles.footer}>
+          Pour toute question, contactez le propriétaire via les coordonnées fournies lors de la réservation.
+        </Text>
+      </Page>
+    </Document>
+  );
 
-      // Pied de page
-      {
-        text: 'Ce document fait office de contrat de location. Veuillez le conserver pour vos archives.',
-        fontSize: 9,
-        color: 'gray',
-        alignment: 'center',
-        margin: [0, 20, 0, 5] as Margins,
-      },
-      {
-        text: 'Pour toute question, contactez le propriétaire via les coordonnées fournies lors de la réservation.',
-        fontSize: 9,
-        color: 'gray',
-        alignment: 'center',
-      },
-    ],
-  };
-
-  return new Promise((resolve, reject) => {
-    try {
-      const pdfDoc = printer.createPdfKitDocument(docDefinition);
-      const chunks: Buffer[] = [];
-
-      pdfDoc.on('data', (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-
-      pdfDoc.on('end', () => {
-        const pdfBuffer = Buffer.concat(chunks);
-        resolve(pdfBuffer);
-      });
-
-      pdfDoc.on('error', (error: Error) => {
-        reject(error);
-      });
-
-      pdfDoc.end();
-    } catch (error: any) {
-      reject(error);
-    }
-  });
+  // Générer le PDF
+  const pdfDoc = pdf(<ContractDocument />);
+  const blob = await pdfDoc.toBlob();
+  const arrayBuffer = await blob.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 };
 
 /**
