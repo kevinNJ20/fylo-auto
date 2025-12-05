@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { sendEmailWebhook, sendContractWebhook } from '@/lib/make-webhook';
 import { getReservation, deleteReservation } from '@/lib/reservation-storage';
-import { generateContractHTML } from '@/lib/contract-html';
+import { generateContractPDF, generateContractFileName } from '@/lib/contract-pdf';
 
 // Configuration pour Vercel: durée maximale d'exécution (30 secondes)
 export const maxDuration = 30;
@@ -59,11 +59,13 @@ export async function POST(request: NextRequest) {
         };
       }
 
-      // Générer le contrat HTML
-      const contractHTML = generateContractHTML(
+      // Générer le contrat PDF
+      const contractPDF = await generateContractPDF(
         reservationData as any,
         reservationId || 'unknown'
       );
+      const contractPDFBase64 = contractPDF.toString('base64');
+      const contractFileName = generateContractFileName(reservationId || 'unknown');
 
       // Envoyer l'email de confirmation via Make.com
       await sendEmailWebhook({
@@ -73,13 +75,21 @@ export async function POST(request: NextRequest) {
         reservationData: reservationData as any,
       });
 
-      // Envoyer le contrat HTML via Make.com
+      // Envoyer le contrat PDF via Make.com
       await sendContractWebhook({
         reservationId: reservationId || 'unknown',
         customerEmail: customerEmail || '',
         customerName: customerName || '',
         reservationData: reservationData as any,
-        contractHTML: contractHTML,
+        contractPDFBase64: contractPDFBase64,
+        contractFileName: contractFileName,
+        contractFileMimeType: 'application/pdf',
+        licenseFileRectoBase64: storedReservation?.licenseFileRecto?.base64,
+        licenseFileRectoName: storedReservation?.licenseFileRecto?.name,
+        licenseFileRectoMimeType: storedReservation?.licenseFileRecto?.mimeType,
+        licenseFileVersoBase64: storedReservation?.licenseFileVerso?.base64,
+        licenseFileVersoName: storedReservation?.licenseFileVerso?.name,
+        licenseFileVersoMimeType: storedReservation?.licenseFileVerso?.mimeType,
       });
 
       // Supprimer la réservation du stockage temporaire après envoi
