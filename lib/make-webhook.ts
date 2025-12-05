@@ -1,7 +1,14 @@
 import axios from 'axios';
 import { ReservationFormData } from '@/types/reservation';
 
-interface MakeWebhookPayload {
+interface EmailWebhookPayload {
+  reservationId: string;
+  customerEmail: string;
+  customerName: string;
+  reservationData: ReservationFormData;
+}
+
+interface ContractWebhookPayload {
   reservationId: string;
   customerEmail: string;
   customerName: string;
@@ -10,7 +17,7 @@ interface MakeWebhookPayload {
 }
 
 export const sendEmailWebhook = async (
-  payload: MakeWebhookPayload
+  payload: EmailWebhookPayload
 ): Promise<void> => {
   const webhookUrl = process.env.MAKE_WEBHOOK_URL_EMAIL;
   
@@ -32,7 +39,7 @@ export const sendEmailWebhook = async (
 };
 
 export const sendContractWebhook = async (
-  payload: MakeWebhookPayload
+  payload: ContractWebhookPayload
 ): Promise<void> => {
   const webhookUrl = process.env.MAKE_WEBHOOK_URL_CONTRACT;
   
