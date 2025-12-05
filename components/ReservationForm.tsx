@@ -298,31 +298,45 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Upload du permis de conduire - Recto *
+              Upload du permis de conduire - Recto (face avant) *
             </label>
             <input
               type="file"
+              name="licenseFileRecto"
+              id="licenseFileRecto"
               accept="image/*,.pdf"
               onChange={handleFileRectoChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {licenseFileRecto && (
-              <p className="text-sm text-green-600 mt-1">Recto sélectionné: {licenseFileRecto.name}</p>
+              <p className="text-sm text-green-600 mt-1">
+                ✓ Recto sélectionné: {licenseFileRecto.name} ({(licenseFileRecto.size / 1024).toFixed(2)} KB)
+              </p>
+            )}
+            {!licenseFileRecto && (
+              <p className="text-xs text-gray-500 mt-1">Veuillez sélectionner le recto (face avant) de votre permis</p>
             )}
           </div>
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Upload du permis de conduire - Verso *
+              Upload du permis de conduire - Verso (face arrière) *
             </label>
             <input
               type="file"
+              name="licenseFileVerso"
+              id="licenseFileVerso"
               accept="image/*,.pdf"
               onChange={handleFileVersoChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
             {licenseFileVerso && (
-              <p className="text-sm text-green-600 mt-1">Verso sélectionné: {licenseFileVerso.name}</p>
+              <p className="text-sm text-green-600 mt-1">
+                ✓ Verso sélectionné: {licenseFileVerso.name} ({(licenseFileVerso.size / 1024).toFixed(2)} KB)
+              </p>
+            )}
+            {!licenseFileVerso && (
+              <p className="text-xs text-gray-500 mt-1">Veuillez sélectionner le verso (face arrière) de votre permis</p>
             )}
           </div>
         </div>

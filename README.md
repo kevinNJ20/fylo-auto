@@ -1,16 +1,17 @@
 # Fylo-Auto - Application de Gestion de Location de Voitures
 
-Application web complète pour la gestion de réservations de location de voitures avec paiement Stripe et intégration Make.com.
+Application web complète pour la gestion de réservations de location de voitures avec intégration Make.com.
 
 ## Fonctionnalités
 
 - 📋 Formulaire de réservation complet avec informations client
-- 🪪 Upload du permis de conduire
+- 🪪 Upload du permis de conduire (recto et verso)
 - 📅 Sélection de créneau de réservation
 - ✅ Engagement obligatoire du client (remise en état, responsabilité des contraventions/dégâts)
-- 💳 Paiement sécurisé via Stripe
+- 💰 Paiement en espèces, PayPal ou Wero lors de la remise des clés
 - 📧 Envoi automatique d'emails via Make.com
-- 📄 Génération et envoi automatique de contrat de location
+- 📄 Génération et envoi automatique de contrat de location (HTML)
+- 📊 Logs détaillés de toutes les réservations
 - 🎨 Interface moderne et responsive
 
 ## Installation
@@ -23,19 +24,12 @@ npm install
 2. Configurer les variables d'environnement :
 Créer un fichier `.env.local` avec les variables suivantes :
 ```
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=votre_clé_publique_stripe
-STRIPE_SECRET_KEY=votre_clé_secrète_stripe
-STRIPE_WEBHOOK_SECRET=votre_secret_webhook_stripe (voir ci-dessous)
 MAKE_WEBHOOK_URL_EMAIL=url_webhook_make_pour_email
 MAKE_WEBHOOK_URL_CONTRACT=url_webhook_make_pour_contrat
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-**Note sur STRIPE_WEBHOOK_SECRET :**
-- Les clés Stripe (publishable + secret) suffisent pour créer les paiements
-- Le webhook secret est nécessaire pour l'envoi automatique d'emails/contrats après paiement
-- **En développement local** : Utilisez Stripe CLI (`stripe listen --forward-to localhost:3000/api/webhook/stripe`) qui affichera un secret
-- **En production** : Dans Stripe Dashboard > Developers > Webhooks, créez un endpoint pointant vers `https://votre-domaine.com/api/webhook/stripe` et récupérez le "Signing secret"
+**Note :** Les webhooks Make.com sont nécessaires pour l'envoi automatique d'emails et de contrats après chaque réservation.
 
 3. Lancer le serveur de développement :
 ```bash
@@ -44,13 +38,27 @@ npm run dev
 
 4. Ouvrir [http://localhost:3000](http://localhost:3000) dans votre navigateur
 
+## Logs et Monitoring
+
+L'application génère des logs détaillés pour chaque réservation :
+
+- **Toutes les données saisies** par le locataire sont loggées
+- **Informations sur les fichiers uploadés** (nom, taille, type)
+- **Statut des webhooks Make.com** (succès/échec)
+- **Durée de traitement** de chaque réservation
+
+**Sur Vercel :**
+- Accédez aux logs via le dashboard Vercel > Votre projet > Logs
+- Les logs incluent toutes les données de réservation pour faciliter le suivi
+- Recherchez "=== NOUVELLE RÉSERVATION ===" pour trouver les nouvelles réservations
+
 ## Configuration Make.com
 
 Deux webhooks Make.com sont nécessaires pour automatiser l'envoi d'emails et la génération de contrats.
 
 ### Scénario 1 : Webhook Email de Confirmation
 
-**Objectif** : Envoyer un email de confirmation au client après paiement réussi.
+**Objectif** : Envoyer un email de confirmation au client après enregistrement de la réservation.
 
 #### Structure du scénario :
 
@@ -203,7 +211,7 @@ MAKE_WEBHOOK_URL_CONTRACT=https://hook.us1.make.com/yyyyyyyyyyyyy
 
 - `/app` - Pages et routes de l'application Next.js
 - `/components` - Composants React réutilisables
-- `/lib` - Utilitaires et configurations (Stripe, PDF, etc.)
+- `/lib` - Utilitaires et configurations (génération de contrats HTML, webhooks Make.com, etc.)
 - `/types` - Définitions TypeScript
 - `/public` - Fichiers statiques
 
@@ -213,7 +221,7 @@ MAKE_WEBHOOK_URL_CONTRACT=https://hook.us1.make.com/yyyyyyyyyyyyy
 - React 18
 - TypeScript
 - Tailwind CSS
-- Stripe
-- jsPDF (génération de contrats)
-- React Hook Form + Zod
+- Make.com (webhooks pour emails et contrats)
+- React Hook Form + Zod (validation de formulaires)
+- Génération de contrats HTML
 
