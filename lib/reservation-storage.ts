@@ -37,7 +37,7 @@ export const storeReservation = (
 
   // Nettoyer les réservations de plus de 24h
   const now = new Date();
-  for (const [id, reservation] of reservations.entries()) {
+  for (const [id, reservation] of Array.from(reservations.entries())) {
     const hoursSinceCreation = (now.getTime() - reservation.createdAt.getTime()) / (1000 * 60 * 60);
     if (hoursSinceCreation > 24) {
       reservations.delete(id);
