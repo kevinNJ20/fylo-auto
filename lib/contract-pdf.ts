@@ -1,6 +1,6 @@
 import PdfPrinter from 'pdfmake';
 import { ReservationFormData } from '@/types/reservation';
-import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import { TDocumentDefinitions, Decoration } from 'pdfmake/interfaces';
 
 /**
  * Génère le contrat de location en PDF
@@ -65,7 +65,7 @@ export const generateContractPDF = async (
         text: 'INFORMATIONS DU LOCATAIRE',
         fontSize: 14,
         bold: true,
-        decoration: 'underline',
+        decoration: 'underline' as Decoration,
         margin: [0, 0, 0, 10],
       },
       {
@@ -86,7 +86,7 @@ export const generateContractPDF = async (
         text: 'INFORMATIONS PERMIS DE CONDUIRE',
         fontSize: 14,
         bold: true,
-        decoration: 'underline',
+        decoration: 'underline' as Decoration,
         margin: [0, 0, 0, 10],
       },
       {
@@ -108,7 +108,7 @@ export const generateContractPDF = async (
         text: 'INFORMATIONS DU VÉHICULE',
         fontSize: 14,
         bold: true,
-        decoration: 'underline',
+        decoration: 'underline' as Decoration,
         margin: [0, 0, 0, 10],
       },
       {
@@ -127,7 +127,7 @@ export const generateContractPDF = async (
         text: 'DÉTAILS DE LA LOCATION',
         fontSize: 14,
         bold: true,
-        decoration: 'underline',
+        decoration: 'underline' as Decoration,
         margin: [0, 0, 0, 10],
       },
       {
@@ -145,7 +145,7 @@ export const generateContractPDF = async (
         text: 'INFORMATIONS DE PAIEMENT',
         fontSize: 14,
         bold: true,
-        decoration: 'underline',
+        decoration: 'underline' as Decoration,
         margin: [0, 0, 0, 10],
       },
       {
@@ -164,7 +164,7 @@ export const generateContractPDF = async (
               text: 'DEMANDES SPÉCIALES',
               fontSize: 14,
               bold: true,
-              decoration: 'underline',
+              decoration: 'underline' as Decoration,
               margin: [0, 0, 0, 10],
             },
             {
@@ -180,7 +180,7 @@ export const generateContractPDF = async (
         text: 'CONDITIONS GÉNÉRALES ET ENGAGEMENTS',
         fontSize: 14,
         bold: true,
-        decoration: 'underline',
+        decoration: 'underline' as Decoration,
         margin: [0, 0, 0, 10],
       },
       {
@@ -219,7 +219,7 @@ export const generateContractPDF = async (
         text: 'SIGNATURES',
         fontSize: 14,
         bold: true,
-        decoration: 'underline',
+        decoration: 'underline' as Decoration,
         margin: [0, 20, 0, 10],
       },
       {
