@@ -106,6 +106,11 @@ export default function ReservationForm({ onSubmit, defaultAmount = 110 }: Reser
   const watchedStartTime = watch('startTime');
   const watchedEndTime = watch('endTime');
   const watchedVehicleType = watch('vehicleType');
+  const watchedFirstName = watch('firstName');
+  const watchedLastName = watch('lastName');
+  const watchedLicenseNumber = watch('licenseNumber');
+  const watchedLicenseIssueDate = watch('licenseIssueDate');
+  const watchedLicenseExpiryDate = watch('licenseExpiryDate');
 
   const onFormSubmit = async (data: ReservationFormValues) => {
     setIsSubmitting(true);
@@ -128,6 +133,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 110 }: Reser
     if (e.target.files && e.target.files[0]) {
       setLicenseFileRecto(e.target.files[0]);
       // Vérifier les permis si les deux fichiers sont présents
+      // La vérification utilisera les données du formulaire si disponibles
       if (licenseFileVerso) {
         verifyLicense(e.target.files[0], licenseFileVerso);
       }
@@ -138,14 +144,28 @@ export default function ReservationForm({ onSubmit, defaultAmount = 110 }: Reser
     if (e.target.files && e.target.files[0]) {
       setLicenseFileVerso(e.target.files[0]);
       // Vérifier les permis si les deux fichiers sont présents
+      // La vérification utilisera les données du formulaire si disponibles
       if (licenseFileRecto) {
         verifyLicense(licenseFileRecto, e.target.files[0]);
       }
     }
   };
 
+  // Re-vérifier automatiquement quand les champs nécessaires sont remplis après l'upload
+  useEffect(() => {
+    if (licenseFileRecto && licenseFileVerso && watchedFirstName && watchedLastName && watchedLicenseNumber && watchedLicenseIssueDate && watchedLicenseExpiryDate) {
+      // Attendre un peu pour éviter les vérifications multiples pendant la saisie
+      const timer = setTimeout(() => {
+        verifyLicense(licenseFileRecto, licenseFileVerso);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watchedFirstName, watchedLastName, watchedLicenseNumber, watchedLicenseIssueDate, watchedLicenseExpiryDate]);
+
   // Vérifier les permis avec OpenAI
-  const verifyLicense = async (recto: File, verso: File) => {
+  const verifyLicense = useCallback(async (recto: File, verso: File) => {
     setIsVerifyingLicense(true);
     setLicenseVerification(null);
 
@@ -153,6 +173,13 @@ export default function ReservationForm({ onSubmit, defaultAmount = 110 }: Reser
       const formData = new FormData();
       formData.append('licenseFileRecto', recto);
       formData.append('licenseFileVerso', verso);
+      
+      // Ajouter les données du formulaire pour comparaison
+      if (watchedFirstName) formData.append('firstName', watchedFirstName);
+      if (watchedLastName) formData.append('lastName', watchedLastName);
+      if (watchedLicenseNumber) formData.append('licenseNumber', watchedLicenseNumber);
+      if (watchedLicenseIssueDate) formData.append('licenseIssueDate', watchedLicenseIssueDate);
+      if (watchedLicenseExpiryDate) formData.append('licenseExpiryDate', watchedLicenseExpiryDate);
 
       const response = await fetch('/api/verify-license', {
         method: 'POST',
@@ -179,7 +206,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 110 }: Reser
     } finally {
       setIsVerifyingLicense(false);
     }
-  };
+  }, [watchedFirstName, watchedLastName, watchedLicenseNumber, watchedLicenseIssueDate, watchedLicenseExpiryDate]);
 
   // Calculer le prix avec OpenAI
   const calculatePrice = useCallback(async () => {
@@ -499,8 +526,100 @@ export default function ReservationForm({ onSubmit, defaultAmount = 110 }: Reser
                           ? '✓ Permis vérifié et valide' 
                           : '⚠ Problèmes détectés avec le permis'}
                       </p>
+                      {/* Informations extraites du permis */}
+                      {licenseVerification.extractedInfo && (
+                        <div className="mt-3 p-3 bg-white rounded border border-gray-200">
+                          <p className="text-xs font-semibold text-gray-600 mb-2">Informations extraites du permis :</p>
+                          <div className="text-xs text-gray-700 space-y-1">
+                            {licenseVerification.extractedInfo.fullName && (
+                              <p><strong>Nom :</strong> {licenseVerification.extractedInfo.fullName}</p>
+                            )}
+                            {licenseVerification.extractedInfo.licenseNumber && (
+                              <p><strong>Numéro de permis :</strong> {licenseVerification.extractedInfo.licenseNumber}</p>
+                            )}
+                            {licenseVerification.extractedInfo.issueDate && (
+                              <p><strong>Date d'obtention :</strong> {licenseVerification.extractedInfo.issueDate}</p>
+                            )}
+                            {licenseVerification.extractedInfo.expiryDate && (
+                              <p><strong>Date d'expiration :</strong> {licenseVerification.extractedInfo.expiryDate}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Résultats de la comparaison */}
+                      {licenseVerification.comparison && (
+                        <div className={`mt-3 p-3 rounded border ${
+                          licenseVerification.comparison.nameMatches && 
+                          licenseVerification.comparison.licenseNumberMatches && 
+                          licenseVerification.comparison.issueDateMatches && 
+                          licenseVerification.comparison.expiryDateMatches
+                            ? 'bg-green-50 border-green-200' 
+                            : 'bg-yellow-50 border-yellow-200'
+                        }`}>
+                          <p className="text-xs font-semibold text-gray-700 mb-2">Comparaison avec les données saisies :</p>
+                          <div className="text-xs space-y-1">
+                            <div className="flex items-center space-x-2">
+                              {licenseVerification.comparison.nameMatches ? (
+                                <span className="text-green-600">✓</span>
+                              ) : (
+                                <span className="text-red-600">✗</span>
+                              )}
+                              <span className={licenseVerification.comparison.nameMatches ? 'text-green-700' : 'text-red-700'}>
+                                Nom : {licenseVerification.comparison.nameMatches ? 'Correspond' : 'Ne correspond pas'}
+                              </span>
+                            </div>
+                            {licenseVerification.comparison.nameDifference && (
+                              <p className="text-red-600 ml-4 text-xs">{licenseVerification.comparison.nameDifference}</p>
+                            )}
+                            
+                            <div className="flex items-center space-x-2">
+                              {licenseVerification.comparison.licenseNumberMatches ? (
+                                <span className="text-green-600">✓</span>
+                              ) : (
+                                <span className="text-red-600">✗</span>
+                              )}
+                              <span className={licenseVerification.comparison.licenseNumberMatches ? 'text-green-700' : 'text-red-700'}>
+                                Numéro de permis : {licenseVerification.comparison.licenseNumberMatches ? 'Correspond' : 'Ne correspond pas'}
+                              </span>
+                            </div>
+                            {licenseVerification.comparison.licenseNumberDifference && (
+                              <p className="text-red-600 ml-4 text-xs">{licenseVerification.comparison.licenseNumberDifference}</p>
+                            )}
+                            
+                            <div className="flex items-center space-x-2">
+                              {licenseVerification.comparison.issueDateMatches ? (
+                                <span className="text-green-600">✓</span>
+                              ) : (
+                                <span className="text-red-600">✗</span>
+                              )}
+                              <span className={licenseVerification.comparison.issueDateMatches ? 'text-green-700' : 'text-red-700'}>
+                                Date d'obtention : {licenseVerification.comparison.issueDateMatches ? 'Correspond' : 'Ne correspond pas'}
+                              </span>
+                            </div>
+                            {licenseVerification.comparison.issueDateDifference && (
+                              <p className="text-red-600 ml-4 text-xs">{licenseVerification.comparison.issueDateDifference}</p>
+                            )}
+                            
+                            <div className="flex items-center space-x-2">
+                              {licenseVerification.comparison.expiryDateMatches ? (
+                                <span className="text-green-600">✓</span>
+                              ) : (
+                                <span className="text-red-600">✗</span>
+                              )}
+                              <span className={licenseVerification.comparison.expiryDateMatches ? 'text-green-700' : 'text-red-700'}>
+                                Date d'expiration : {licenseVerification.comparison.expiryDateMatches ? 'Correspond' : 'Ne correspond pas'}
+                              </span>
+                            </div>
+                            {licenseVerification.comparison.expiryDateDifference && (
+                              <p className="text-red-600 ml-4 text-xs">{licenseVerification.comparison.expiryDateDifference}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {licenseVerification.issues && licenseVerification.issues.length > 0 && (
-                        <ul className="mt-2 text-sm text-red-700 list-disc list-inside">
+                        <ul className="mt-3 text-sm text-red-700 list-disc list-inside">
                           {licenseVerification.issues.map((issue: string, index: number) => (
                             <li key={index}>{issue}</li>
                           ))}

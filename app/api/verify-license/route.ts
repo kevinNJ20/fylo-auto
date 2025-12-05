@@ -14,6 +14,13 @@ export async function POST(request: NextRequest) {
     const licenseFileRecto = formData.get('licenseFileRecto') as File | null;
     const licenseFileVerso = formData.get('licenseFileVerso') as File | null;
 
+    // Récupérer les données du formulaire pour comparaison
+    const userFirstName = formData.get('firstName')?.toString() || '';
+    const userLastName = formData.get('lastName')?.toString() || '';
+    const userLicenseNumber = formData.get('licenseNumber')?.toString() || '';
+    const userLicenseIssueDate = formData.get('licenseIssueDate')?.toString() || '';
+    const userLicenseExpiryDate = formData.get('licenseExpiryDate')?.toString() || '';
+
     if (!licenseFileRecto || !licenseFileVerso) {
       return NextResponse.json(
         { error: 'Les deux faces du permis (recto et verso) sont requises' },
@@ -24,6 +31,13 @@ export async function POST(request: NextRequest) {
     console.log('=== VÉRIFICATION DES PERMIS ===');
     console.log('Recto:', licenseFileRecto.name, licenseFileRecto.size, 'bytes');
     console.log('Verso:', licenseFileVerso.name, licenseFileVerso.size, 'bytes');
+    console.log('Données utilisateur pour comparaison:', {
+      firstName: userFirstName,
+      lastName: userLastName,
+      licenseNumber: userLicenseNumber,
+      issueDate: userLicenseIssueDate,
+      expiryDate: userLicenseExpiryDate,
+    });
 
     // Convertir les fichiers en base64 pour OpenAI Vision
     const rectoArrayBuffer = await licenseFileRecto.arrayBuffer();
@@ -49,6 +63,17 @@ export async function POST(request: NextRequest) {
           3. Si le permis n'est pas expiré
           4. Si le permis semble authentique (pas de signes évidents de falsification)
           5. Si les deux faces correspondent au même permis
+          6. **IMPORTANT** : Extrais les informations suivantes du permis et compare-les avec les données fournies par l'utilisateur :
+             - Nom complet (prénom + nom)
+             - Numéro de permis
+             - Date d'obtention
+             - Date d'expiration
+          
+          Données fournies par l'utilisateur à comparer :
+          - Nom : ${userFirstName} ${userLastName}
+          - Numéro de permis : ${userLicenseNumber}
+          - Date d'obtention : ${userLicenseIssueDate}
+          - Date d'expiration : ${userLicenseExpiryDate}
           
           Réponds en JSON avec cette structure :
           {
@@ -58,12 +83,26 @@ export async function POST(request: NextRequest) {
             "isExpired": boolean,
             "isAuthentic": boolean,
             "facesMatch": boolean,
-            "issues": string[],
             "extractedInfo": {
+              "firstName": string | null,
+              "lastName": string | null,
+              "fullName": string | null,
               "licenseNumber": string | null,
+              "issueDate": string | null,
               "expiryDate": string | null,
               "country": string | null
             },
+            "comparison": {
+              "nameMatches": boolean,
+              "licenseNumberMatches": boolean,
+              "issueDateMatches": boolean,
+              "expiryDateMatches": boolean,
+              "nameDifference": string | null,
+              "licenseNumberDifference": string | null,
+              "issueDateDifference": string | null,
+              "expiryDateDifference": string | null
+            },
+            "issues": string[],
             "recommendation": string
           }`,
         },
@@ -72,7 +111,23 @@ export async function POST(request: NextRequest) {
           content: [
             {
               type: 'text',
-              text: 'Analyse le recto (face avant) et le verso (face arrière) de ce permis de conduire. Vérifie l\'authenticité, la validité et la cohérence des informations.',
+              text: `Analyse le recto (face avant) et le verso (face arrière) de ce permis de conduire. 
+              
+              Vérifie l'authenticité, la validité et la cohérence des informations.
+              
+              **TÂCHE CRITIQUE** : Extrais les informations suivantes du permis et compare-les avec les données fournies :
+              - Nom complet (prénom et nom de famille)
+              - Numéro de permis
+              - Date d'obtention
+              - Date d'expiration
+              
+              Données à comparer :
+              - Nom : ${userFirstName} ${userLastName}
+              - Numéro de permis : ${userLicenseNumber}
+              - Date d'obtention : ${userLicenseIssueDate}
+              - Date d'expiration : ${userLicenseExpiryDate}
+              
+              Si les informations extraites ne correspondent pas exactement, indique les différences dans le champ "comparison" et ajoute un problème dans "issues".`,
             },
             {
               type: 'image_url',
