@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
           
           Réponds UNIQUEMENT en JSON avec cette structure :
           {
-            "price": number (prix en centimes d'euros, ex: 11000 pour 110€),
-            "pricePerDay": number (prix par jour en centimes),
+            "price": number (prix en euros, ex: 110 pour 110€),
+            "pricePerDay": number (prix par jour en euros),
             "days": number,
             "season": string,
             "explanation": string (explication courte du calcul),
@@ -82,12 +82,12 @@ export async function POST(request: NextRequest) {
     console.log(JSON.stringify(pricing, null, 2));
 
     // Valider que le prix est raisonnable (minimum 50€, maximum 500€ par jour)
-    const priceInCents = pricing.price || 11000; // Par défaut 110€
-    const minPrice = 5000; // 50€ minimum
-    const maxPricePerDay = 50000; // 500€ par jour maximum
+    const priceInEuros = pricing.price || 110; // Par défaut 110€
+    const minPrice = 50; // 50€ minimum
+    const maxPricePerDay = 500; // 500€ par jour maximum
     const maxTotalPrice = maxPricePerDay * diffDays;
 
-    const finalPrice = Math.max(minPrice, Math.min(priceInCents, maxTotalPrice));
+    const finalPrice = Math.max(minPrice, Math.min(priceInEuros, maxTotalPrice));
 
     return NextResponse.json({
       success: true,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: error.message || 'Erreur lors du calcul du prix',
         // Prix par défaut en cas d'erreur
-        price: 11000,
+        price: 110,
         days: 1,
       },
       { status: 500 }

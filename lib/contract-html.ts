@@ -19,7 +19,7 @@ export const generateContractHTML = (
     return new Date(dateString).toLocaleDateString('fr-FR');
   };
 
-  const amount = (reservationData.amount / 100).toFixed(2);
+  const amount = reservationData.amount.toFixed(2);
 
   return `
 <!DOCTYPE html>

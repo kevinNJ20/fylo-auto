@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { useState, useEffect, useCallback } from 'react';
 import React from 'react';
 import { ReservationFormData } from '@/types/reservation';
-import { formatAmountForStripe } from '@/lib/stripe';
 
 const reservationSchema = z.object({
   // Informations personnelles
@@ -70,7 +69,7 @@ interface ReservationFormProps {
   defaultAmount?: number;
 }
 
-export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: ReservationFormProps) {
+export default function ReservationForm({ onSubmit, defaultAmount = 110 }: ReservationFormProps) {
   const [licenseFileRecto, setLicenseFileRecto] = useState<File | null>(null);
   const [licenseFileVerso, setLicenseFileVerso] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -214,7 +213,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
         setPriceExplanation(result.explanation || '');
         // Mettre à jour le montant dans le formulaire
         setValue('amount', result.price);
-        console.log('Prix calculé:', result.price, 'centimes');
+        console.log('Prix calculé:', result.price, 'euros');
       }
     } catch (error: any) {
       console.error('Erreur lors du calcul du prix:', error);
@@ -671,7 +670,7 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
                     <div>
                       <p className="text-sm font-semibold text-green-800">Prix calculé automatiquement</p>
                       <p className="text-2xl font-bold text-green-700 mt-1">
-                        {(calculatedPrice / 100).toFixed(2)} €
+                        {calculatedPrice.toFixed(2)} €
                       </p>
                       {priceExplanation && (
                         <p className="text-xs text-gray-600 mt-2">{priceExplanation}</p>
