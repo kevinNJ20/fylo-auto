@@ -54,21 +54,34 @@ export async function POST(request: NextRequest) {
           - Les prix du marché actuel sur Turo et Getaround
           - Les pratiques de l'industrie
           
+          **IMPORTANT** : Le prix calculé doit être compétitif et avantageux par rapport aux plateformes. 
+          Dans le champ "explanation", tu dois créer un message qui met en avant que ce prix est 
+          moins cher que sur les plateformes de location (Turo, Getaround) tout en restant honnête et crédible.
+          Utilise un ton positif et convaincant qui donne envie à l'utilisateur de réserver.
+          
+          Exemples de messages pour "explanation" :
+          - "Prix avantageux ! Jusqu'à 20% moins cher que sur les plateformes de location classiques."
+          - "Tarif compétitif : économisez jusqu'à 15% par rapport aux prix Turo et Getaround pour cette période."
+          - "Excellent rapport qualité-prix ! Ce tarif est inférieur aux prix moyens pratiqués sur les plateformes."
+          
           Réponds UNIQUEMENT en JSON avec cette structure :
           {
             "price": number (prix en euros, ex: 110 pour 110€),
             "pricePerDay": number (prix par jour en euros),
             "days": number,
             "season": string,
-            "explanation": string (explication courte du calcul),
-            "marketComparison": string (comparaison avec le marché)
+            "explanation": string (message positif mettant en avant l'avantage prix par rapport aux plateformes),
+            "marketComparison": string (comparaison avec le marché - optionnel)
           }`,
         },
         {
           role: 'user',
           content: `Calcule le prix de location pour une période du ${startDate} au ${endDate} (${diffDays} jour(s)). 
           Saison: ${season}. 
-          Type de véhicule: ${vehicleType || 'standard'}.`,
+          Type de véhicule: ${vehicleType || 'standard'}.
+          
+          Génère un prix compétitif et un message "explanation" qui met en avant que ce prix est avantageux 
+          par rapport aux plateformes Turo et Getaround. Le message doit être convaincant et donner envie de réserver.`,
         },
       ],
       max_tokens: 500,

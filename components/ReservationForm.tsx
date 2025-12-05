@@ -792,7 +792,9 @@ export default function ReservationForm({ onSubmit, defaultAmount = 110 }: Reser
                         {calculatedPrice.toFixed(2)} €
                       </p>
                       {priceExplanation && (
-                        <p className="text-xs text-gray-600 mt-2">{priceExplanation}</p>
+                        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                          <p className="text-xs font-medium text-blue-800">{priceExplanation}</p>
+                        </div>
                       )}
                     </div>
                     <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
