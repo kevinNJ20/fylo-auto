@@ -1,6 +1,6 @@
 import PdfPrinter from 'pdfmake';
 import { ReservationFormData } from '@/types/reservation';
-import { TDocumentDefinitions, Decoration } from 'pdfmake/interfaces';
+import { TDocumentDefinitions, Decoration, Margins } from 'pdfmake/interfaces';
 
 /**
  * Génère le contrat de location en PDF
@@ -45,19 +45,19 @@ export const generateContractPDF = async (
         fontSize: 20,
         bold: true,
         alignment: 'center',
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         text: `Numéro de réservation : ${reservationId}`,
         fontSize: 10,
         alignment: 'center',
-        margin: [0, 0, 0, 5],
+        margin: [0, 0, 0, 5] as Margins,
       },
       {
         text: `Date du contrat : ${formatDate(new Date().toISOString())}`,
         fontSize: 10,
         alignment: 'center',
-        margin: [0, 0, 0, 20],
+        margin: [0, 0, 0, 20] as Margins,
       },
 
       // Informations du locataire
@@ -66,7 +66,7 @@ export const generateContractPDF = async (
         fontSize: 14,
         bold: true,
         decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -78,7 +78,7 @@ export const generateContractPDF = async (
           `Adresse : ${reservationData.address}, ${reservationData.postalCode} ${reservationData.city}\n`,
           `Pays : ${reservationData.country}`,
         ],
-        margin: [0, 0, 0, 15],
+        margin: [0, 0, 0, 15] as Margins,
       },
 
       // Informations permis de conduire
@@ -87,7 +87,7 @@ export const generateContractPDF = async (
         fontSize: 14,
         bold: true,
         decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -100,7 +100,7 @@ export const generateContractPDF = async (
             ? `Points restants : ${reservationData.licensePoints}`
             : `Points restants : Non applicable (permis étranger)`,
         ],
-        margin: [0, 0, 0, 15],
+        margin: [0, 0, 0, 15] as Margins,
       },
 
       // Informations du véhicule
@@ -109,7 +109,7 @@ export const generateContractPDF = async (
         fontSize: 14,
         bold: true,
         decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -119,7 +119,7 @@ export const generateContractPDF = async (
           `Plaque d'immatriculation : FG954MV\n`,
           `Numéro de contrat d'assurance : 100029573215`,
         ],
-        margin: [0, 0, 0, 15],
+        margin: [0, 0, 0, 15] as Margins,
       },
 
       // Détails de la location
@@ -128,7 +128,7 @@ export const generateContractPDF = async (
         fontSize: 14,
         bold: true,
         decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -137,7 +137,7 @@ export const generateContractPDF = async (
           `Heures : De ${reservationData.startTime} à ${reservationData.endTime}`,
           ...(reservationData.vehicleType ? [`\nType de véhicule : ${reservationData.vehicleType}`] : []),
         ],
-        margin: [0, 0, 0, 15],
+        margin: [0, 0, 0, 15] as Margins,
       },
 
       // Informations de paiement
@@ -146,7 +146,7 @@ export const generateContractPDF = async (
         fontSize: 14,
         bold: true,
         decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -154,7 +154,7 @@ export const generateContractPDF = async (
           `Montant total : ${reservationData.amount.toFixed(2)} ${reservationData.currency.toUpperCase()}\n`,
           `Méthode de paiement : Paiement en espèces, PayPal ou Wero à la remise des clés.`,
         ],
-        margin: [0, 0, 0, 15],
+        margin: [0, 0, 0, 15] as Margins,
       },
 
       // Demandes particulières
@@ -165,12 +165,12 @@ export const generateContractPDF = async (
               fontSize: 14,
               bold: true,
               decoration: 'underline' as Decoration,
-              margin: [0, 0, 0, 10],
+              margin: [0, 0, 0, 10] as Margins,
             },
             {
               fontSize: 11,
               text: reservationData.specialRequests,
-              margin: [0, 0, 0, 15],
+              margin: [0, 0, 0, 15] as Margins,
             },
           ]
         : []),
@@ -181,7 +181,7 @@ export const generateContractPDF = async (
         fontSize: 14,
         bold: true,
         decoration: 'underline' as Decoration,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -193,7 +193,7 @@ export const generateContractPDF = async (
           "En cas de contravention, la désignation du conducteur sera effectuée conformément aux informations fournies lors de la réservation (numéro de permis, informations personnelles, copies du permis de conduire).",
           "L'assurance du véhicule est en vigueur selon les termes du contrat d'assurance.",
         ],
-        margin: [0, 0, 0, 15],
+        margin: [0, 0, 0, 15] as Margins,
       },
 
       // Acceptation des conditions
@@ -204,12 +204,12 @@ export const generateContractPDF = async (
               fontSize: 11,
               bold: true,
               color: 'blue',
-              margin: [0, 0, 0, 5],
+              margin: [0, 0, 0, 5] as Margins,
             },
             {
               fontSize: 11,
               text: `Le locataire a accepté et signé numériquement ces conditions lors de la réservation le ${formatDate(new Date().toISOString())}.`,
-              margin: [0, 0, 0, 15],
+              margin: [0, 0, 0, 15] as Margins,
             },
           ]
         : []),
@@ -220,12 +220,12 @@ export const generateContractPDF = async (
         fontSize: 14,
         bold: true,
         decoration: 'underline' as Decoration,
-        margin: [0, 20, 0, 10],
+        margin: [0, 20, 0, 10] as Margins,
       },
       {
         text: 'Locataire :',
         fontSize: 11,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -233,17 +233,17 @@ export const generateContractPDF = async (
           `Nom : ${reservationData.firstName} ${reservationData.lastName}\n`,
           `Date : ${formatDate(new Date().toISOString())}`,
         ],
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         text: 'Signature : ___________________',
         fontSize: 11,
-        margin: [0, 0, 0, 20],
+        margin: [0, 0, 0, 20] as Margins,
       },
       {
         text: 'Propriétaire :',
         fontSize: 11,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         fontSize: 11,
@@ -251,12 +251,12 @@ export const generateContractPDF = async (
           `Nom : JAMEIN NJUNDJA Kevin\n`,
           `Date : ${formatDate(new Date().toISOString())}`,
         ],
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10] as Margins,
       },
       {
         text: 'Signature : ___________________',
         fontSize: 11,
-        margin: [0, 0, 0, 20],
+        margin: [0, 0, 0, 20] as Margins,
       },
 
       // Pied de page
@@ -265,7 +265,7 @@ export const generateContractPDF = async (
         fontSize: 9,
         color: 'gray',
         alignment: 'center',
-        margin: [0, 20, 0, 5],
+        margin: [0, 20, 0, 5] as Margins,
       },
       {
         text: 'Pour toute question, contactez le propriétaire via les coordonnées fournies lors de la réservation.',
