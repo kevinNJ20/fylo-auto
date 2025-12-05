@@ -12,7 +12,7 @@ Application web complète pour la gestion de réservations de location de voitur
 - ✅ Engagement obligatoire du client (remise en état, responsabilité des contraventions/dégâts)
 - 💵 Paiement en espèces, PayPal ou Wero lors de la remise des clés
 - 📧 Envoi automatique d'emails via Make.com
-- 📄 Génération et envoi automatique de contrat de location (HTML)
+- 📄 Génération et envoi automatique de contrat de location (PDF)
 - 📊 Logs détaillés de toutes les réservations
 - 🎨 Interface moderne et responsive
 
@@ -133,9 +133,9 @@ Deux webhooks Make.com sont nécessaires pour automatiser l'envoi d'emails et la
 
 ---
 
-### Scénario 2 : Webhook Envoi de Contrat par Email
+### Scénario 2 : Webhook Envoi de Contrat PDF par Email
 
-**Objectif** : Envoyer le contrat de location complet par email au client. Le contrat est généré en HTML et fait office de contrat officiel.
+**Objectif** : Envoyer le contrat de location complet en format PDF par email au client. Le contrat est généré en PDF professionnel et fait office de contrat officiel.
 
 #### Structure du scénario :
 
@@ -144,31 +144,41 @@ Deux webhooks Make.com sont nécessaires pour automatiser l'envoi d'emails et la
    - Méthode : POST
    - Copiez l'URL du webhook générée et ajoutez-la dans `.env.local` comme `MAKE_WEBHOOK_URL_CONTRACT`
 
-2. **Module 2 : Email au Client**
+2. **Module 2 : Convertir Base64 en Fichier PDF**
+   - Type : Tools > Convert Base64 to File
+   - Base64 : `{{1.contractPDFBase64}}`
+   - Filename : `{{1.contractFileName}}`
+   - MIME Type : `{{1.contractFileMimeType}}` (ou `application/pdf`)
+
+3. **Module 3 : Email au Client**
    - Type : Email > Send an Email (Gmail, Outlook, etc.)
    - To : `{{1.customerEmail}}`
    - Subject : `Votre contrat de location - {{1.reservationId}}`
-   - **Body (HTML)** : Utilisez directement `{{1.contractHTML}}`
-   - **Format** : HTML
+   - **Body** : Message de confirmation personnalisé
+   - **Pièce jointe** : Le fichier PDF converti à l'étape précédente
 
-3. **Module 3 : Email au Propriétaire** (Optionnel mais recommandé)
+4. **Module 4 : Convertir Base64 en Fichiers Permis** (Pour le propriétaire)
+   - **Fichier 1 - Permis Recto** :
+     - Type : Tools > Convert Base64 to File
+     - Base64 : `{{1.licenseFileRectoBase64}}`
+     - Filename : `{{1.licenseFileRectoName}}`
+     - MIME Type : `{{1.licenseFileRectoMimeType}}`
+   - **Fichier 2 - Permis Verso** :
+     - Type : Tools > Convert Base64 to File
+     - Base64 : `{{1.licenseFileVersoBase64}}`
+     - Filename : `{{1.licenseFileVersoName}}`
+     - MIME Type : `{{1.licenseFileVersoMimeType}}`
+
+5. **Module 5 : Email au Propriétaire** (Optionnel mais recommandé)
    - Type : Email > Send an Email (Gmail, Outlook, etc.)
    - To : Votre adresse email (propriétaire)
    - Subject : `Nouvelle réservation - Contrat à signer - {{1.reservationId}}`
    - **Body** : Message personnalisé avec les détails de la réservation
    - **Pièces jointes** : 
-     - **Fichier 1** : Permis recto
-       - Nom : `{{1.licenseFileRectoName}}`
-       - Contenu : Décoder `{{1.licenseFileRectoBase64}}` depuis base64
-       - Type MIME : `{{1.licenseFileRectoMimeType}}`
-     - **Fichier 2** : Permis verso
-       - Nom : `{{1.licenseFileVersoName}}`
-       - Contenu : Décoder `{{1.licenseFileVersoBase64}}` depuis base64
-       - Type MIME : `{{1.licenseFileVersoMimeType}}`
+     - Le contrat PDF (converti à l'étape 2)
+     - Les deux fichiers permis (convertis à l'étape 4)
 
-**Note** : Dans Make.com, pour ajouter les pièces jointes, utilisez le module "Convert Base64 to File" ou "Create File from Base64" pour convertir les champs `licenseFileRectoBase64` et `licenseFileVersoBase64` en fichiers avant de les joindre à l'email.
-
-Le contrat HTML contient toutes les informations nécessaires et peut être imprimé ou sauvegardé par le client.
+**Note** : Le contrat PDF contient toutes les informations nécessaires et peut être imprimé, signé ou sauvegardé par le client et le propriétaire.
 
 #### Structure JSON reçue par le webhook :
 
@@ -179,7 +189,9 @@ Le contrat HTML contient toutes les informations nécessaires et peut être impr
   "customerEmail": "client@example.com",
   "customerName": "Jean Dupont",
   "timestamp": "2024-01-15T10:30:00.000Z",
-  "contractHTML": "<!DOCTYPE html><html>...contenu HTML complet du contrat...</html>",
+  "contractPDFBase64": "JVBERi0xLjQKJeLjz9MKMyAw...",
+  "contractFileName": "contrat-location-abc123-def456-ghi789.pdf",
+  "contractFileMimeType": "application/pdf",
   "licenseFileRectoBase64": "iVBORw0KGgoAAAANSUhEUgAA...",
   "licenseFileRectoName": "permis_recto.jpg",
   "licenseFileRectoMimeType": "image/jpeg",
@@ -215,10 +227,10 @@ Le contrat HTML contient toutes les informations nécessaires et peut être impr
 
 #### Notes importantes :
 
-- **Le contrat HTML est complet** : Il contient toutes les informations de la réservation, les conditions générales, et les signatures numériques.
-- **Aucune manipulation nécessaire** : Le contrat est prêt à être envoyé directement dans le body de l'email.
-- **Format HTML** : Assurez-vous que votre module Email est configuré pour accepter le format HTML (pas seulement texte brut).
-- **Le contrat fait office de document officiel** : Le client peut l'imprimer, le sauvegarder ou le transférer pour ses archives.
+- **Le contrat PDF est complet** : Il contient toutes les informations de la réservation, les conditions générales, et les signatures numériques.
+- **Conversion Base64 requise** : Utilisez le module "Convert Base64 to File" de Make.com pour convertir le PDF base64 en fichier avant de l'envoyer en pièce jointe.
+- **Format PDF professionnel** : Le contrat est généré en format A4 avec une mise en page professionnelle.
+- **Le contrat fait office de document officiel** : Le client peut l'imprimer, le signer, le sauvegarder ou le transférer pour ses archives.
 
 ---
 
@@ -239,7 +251,7 @@ MAKE_WEBHOOK_URL_CONTRACT=https://hook.us1.make.com/yyyyyyyyyyyyy
 
 - `/app` - Pages et routes de l'application Next.js
 - `/components` - Composants React réutilisables
-- `/lib` - Utilitaires et configurations (génération de contrats HTML, webhooks Make.com, etc.)
+- `/lib` - Utilitaires et configurations (génération de contrats PDF, webhooks Make.com, etc.)
 - `/types` - Définitions TypeScript
 - `/public` - Fichiers statiques
 
@@ -251,5 +263,5 @@ MAKE_WEBHOOK_URL_CONTRACT=https://hook.us1.make.com/yyyyyyyyyyyyy
 - Tailwind CSS
 - Make.com (webhooks pour emails et contrats)
 - React Hook Form + Zod (validation de formulaires)
-- Génération de contrats HTML
+- Génération de contrats PDF
 

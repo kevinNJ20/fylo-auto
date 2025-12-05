@@ -13,7 +13,9 @@ interface ContractWebhookPayload {
   customerEmail: string;
   customerName: string;
   reservationData: ReservationFormData;
-  contractHTML: string; // Contrat HTML complet à envoyer par email
+  contractPDFBase64: string; // Contrat PDF en base64
+  contractFileName: string; // Nom du fichier PDF
+  contractFileMimeType: string; // Type MIME du fichier PDF (application/pdf)
   licenseFileRectoBase64?: string; // Permis recto en base64
   licenseFileRectoName?: string; // Nom du fichier recto
   licenseFileRectoMimeType?: string; // Type MIME du fichier recto

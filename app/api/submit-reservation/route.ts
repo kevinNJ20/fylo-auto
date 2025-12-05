@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { storeReservation } from '@/lib/reservation-storage';
 import { sendEmailWebhook, sendContractWebhook } from '@/lib/make-webhook';
-import { generateContractHTML } from '@/lib/contract-html';
+import { generateContractPDF, generateContractFileName } from '@/lib/contract-pdf';
 
 // Configuration pour Vercel: durée maximale d'exécution (30 secondes)
 export const maxDuration = 30;
@@ -124,10 +124,12 @@ export async function POST(request: NextRequest) {
       versoName: licenseFileVersoData?.name,
     }, null, 2));
 
-    // Générer le contrat HTML
-    console.log('=== GÉNÉRATION DU CONTRAT ===');
-    const contractHTML = generateContractHTML(reservationData, reservationId);
-    console.log('Contrat HTML généré:', contractHTML.length, 'caractères');
+    // Générer le contrat PDF
+    console.log('=== GÉNÉRATION DU CONTRAT PDF ===');
+    const contractPDF = await generateContractPDF(reservationData, reservationId);
+    const contractPDFBase64 = contractPDF.toString('base64');
+    const contractFileName = generateContractFileName(reservationId);
+    console.log('Contrat PDF généré:', contractPDF.length, 'octets');
 
     // Envoyer les webhooks Make.com
     console.log('=== ENVOI DES WEBHOOKS ===');
@@ -151,7 +153,9 @@ export async function POST(request: NextRequest) {
         customerEmail: reservationData.email || '',
         customerName: `${reservationData.firstName || ''} ${reservationData.lastName || ''}`.trim(),
         reservationData,
-        contractHTML,
+        contractPDFBase64: contractPDFBase64,
+        contractFileName: contractFileName,
+        contractFileMimeType: 'application/pdf',
         licenseFileRectoBase64: licenseFileRectoData?.base64,
         licenseFileRectoName: licenseFileRectoData?.name,
         licenseFileRectoMimeType: licenseFileRectoData?.mimeType,
@@ -160,6 +164,7 @@ export async function POST(request: NextRequest) {
         licenseFileVersoMimeType: licenseFileVersoData?.mimeType,
       });
       console.log('✓ Webhook contrat envoyé avec succès');
+      console.log('  - Contrat PDF:', `${contractFileName} (${contractPDF.length} octets)`);
       console.log('  - Recto:', licenseFileRectoData ? `${licenseFileRectoData.name} (${licenseFileRectoData.base64.length} caractères base64)` : 'non fourni');
       console.log('  - Verso:', licenseFileVersoData ? `${licenseFileVersoData.name} (${licenseFileVersoData.base64.length} caractères base64)` : 'non fourni');
     } catch (error: any) {
