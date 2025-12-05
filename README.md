@@ -5,10 +5,12 @@ Application web complète pour la gestion de réservations de location de voitur
 ## Fonctionnalités
 
 - 📋 Formulaire de réservation complet avec informations client
-- 🪪 Upload du permis de conduire (recto et verso)
+- 🪪 Upload du permis de conduire (recto et verso) avec vérification IA automatique
+- 🤖 Vérification intelligente des permis avec OpenAI Vision (authenticité, validité, expiration)
+- 💰 Calcul automatique du prix de location basé sur les dates, saison et marché (Turo, Getaround)
 - 📅 Sélection de créneau de réservation
 - ✅ Engagement obligatoire du client (remise en état, responsabilité des contraventions/dégâts)
-- 💰 Paiement en espèces, PayPal ou Wero lors de la remise des clés
+- 💵 Paiement en espèces, PayPal ou Wero lors de la remise des clés
 - 📧 Envoi automatique d'emails via Make.com
 - 📄 Génération et envoi automatique de contrat de location (HTML)
 - 📊 Logs détaillés de toutes les réservations
@@ -24,12 +26,15 @@ npm install
 2. Configurer les variables d'environnement :
 Créer un fichier `.env.local` avec les variables suivantes :
 ```
+OPENAI_API_KEY=votre_clé_api_openai
 MAKE_WEBHOOK_URL_EMAIL=url_webhook_make_pour_email
 MAKE_WEBHOOK_URL_CONTRACT=url_webhook_make_pour_contrat
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-**Note :** Les webhooks Make.com sont nécessaires pour l'envoi automatique d'emails et de contrats après chaque réservation.
+**Notes :**
+- **OPENAI_API_KEY** : Clé API OpenAI (gpt-4o-mini) pour la vérification des permis et le calcul des prix. Obtenez-la sur [platform.openai.com](https://platform.openai.com/api-keys)
+- Les webhooks Make.com sont nécessaires pour l'envoi automatique d'emails et de contrats après chaque réservation.
 
 3. Lancer le serveur de développement :
 ```bash

@@ -3,7 +3,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { ReservationFormData } from '@/types/reservation';
 import { formatAmountForStripe } from '@/lib/stripe';
 
@@ -74,12 +75,22 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
   const [licenseFileVerso, setLicenseFileVerso] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasViolations, setHasViolations] = useState(false);
+  
+  // États pour la vérification des permis
+  const [isVerifyingLicense, setIsVerifyingLicense] = useState(false);
+  const [licenseVerification, setLicenseVerification] = useState<any>(null);
+  
+  // États pour le calcul du prix
+  const [isCalculatingPrice, setIsCalculatingPrice] = useState(false);
+  const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
+  const [priceExplanation, setPriceExplanation] = useState<string>('');
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<ReservationFormValues>({
     resolver: zodResolver(reservationSchema),
     defaultValues: {
@@ -91,6 +102,11 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
   });
 
   const watchedHasViolations = watch('hasViolations');
+  const watchedStartDate = watch('startDate');
+  const watchedEndDate = watch('endDate');
+  const watchedStartTime = watch('startTime');
+  const watchedEndTime = watch('endTime');
+  const watchedVehicleType = watch('vehicleType');
 
   const onFormSubmit = async (data: ReservationFormValues) => {
     setIsSubmitting(true);
@@ -112,14 +128,111 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
   const handleFileRectoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setLicenseFileRecto(e.target.files[0]);
+      // Vérifier les permis si les deux fichiers sont présents
+      if (licenseFileVerso) {
+        verifyLicense(e.target.files[0], licenseFileVerso);
+      }
     }
   };
 
   const handleFileVersoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setLicenseFileVerso(e.target.files[0]);
+      // Vérifier les permis si les deux fichiers sont présents
+      if (licenseFileRecto) {
+        verifyLicense(licenseFileRecto, e.target.files[0]);
+      }
     }
   };
+
+  // Vérifier les permis avec OpenAI
+  const verifyLicense = async (recto: File, verso: File) => {
+    setIsVerifyingLicense(true);
+    setLicenseVerification(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('licenseFileRecto', recto);
+      formData.append('licenseFileVerso', verso);
+
+      const response = await fetch('/api/verify-license', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.analysis) {
+        setLicenseVerification(result.analysis);
+        console.log('Vérification du permis:', result.analysis);
+      } else {
+        setLicenseVerification({
+          isValid: false,
+          issues: [result.error || 'Erreur lors de la vérification'],
+        });
+      }
+    } catch (error: any) {
+      console.error('Erreur lors de la vérification:', error);
+      setLicenseVerification({
+        isValid: false,
+        issues: ['Erreur lors de la vérification du permis'],
+      });
+    } finally {
+      setIsVerifyingLicense(false);
+    }
+  };
+
+  // Calculer le prix avec OpenAI
+  const calculatePrice = useCallback(async () => {
+    if (!watchedStartDate || !watchedEndDate) {
+      return;
+    }
+
+    setIsCalculatingPrice(true);
+    setCalculatedPrice(null);
+    setPriceExplanation('');
+
+    try {
+      const response = await fetch('/api/calculate-price', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startDate: watchedStartDate,
+          endDate: watchedEndDate,
+          startTime: watchedStartTime,
+          endTime: watchedEndTime,
+          vehicleType: watchedVehicleType,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.price) {
+        setCalculatedPrice(result.price);
+        setPriceExplanation(result.explanation || '');
+        // Mettre à jour le montant dans le formulaire
+        setValue('amount', result.price);
+        console.log('Prix calculé:', result.price, 'centimes');
+      }
+    } catch (error: any) {
+      console.error('Erreur lors du calcul du prix:', error);
+    } finally {
+      setIsCalculatingPrice(false);
+    }
+  }, [watchedStartDate, watchedEndDate, watchedStartTime, watchedEndTime, watchedVehicleType, setValue]);
+
+  // Calculer automatiquement le prix quand les dates changent
+  useEffect(() => {
+    if (watchedStartDate && watchedEndDate) {
+      const timer = setTimeout(() => {
+        calculatePrice();
+      }, 1000); // Attendre 1 seconde après la dernière modification
+
+      return () => clearTimeout(timer);
+    }
+  }, [watchedStartDate, watchedEndDate, calculatePrice]);
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
@@ -352,6 +465,57 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
               <p className="text-xs text-gray-500 mt-1">Veuillez sélectionner le verso (face arrière) de votre permis</p>
             )}
           </div>
+
+          {/* Résultat de la vérification des permis */}
+          {licenseFileRecto && licenseFileVerso && (
+            <div className="md:col-span-2 mt-4">
+              {isVerifyingLicense ? (
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <p className="text-sm text-blue-700">Vérification du permis en cours avec l'IA...</p>
+                  </div>
+                </div>
+              ) : licenseVerification ? (
+                <div className={`border rounded-md p-4 ${
+                  licenseVerification.isValid 
+                    ? 'bg-green-50 border-green-200' 
+                    : 'bg-red-50 border-red-200'
+                }`}>
+                  <div className="flex items-start space-x-2">
+                    {licenseVerification.isValid ? (
+                      <svg className="h-5 w-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    )}
+                    <div className="flex-1">
+                      <p className={`text-sm font-semibold ${
+                        licenseVerification.isValid ? 'text-green-800' : 'text-red-800'
+                      }`}>
+                        {licenseVerification.isValid 
+                          ? '✓ Permis vérifié et valide' 
+                          : '⚠ Problèmes détectés avec le permis'}
+                      </p>
+                      {licenseVerification.issues && licenseVerification.issues.length > 0 && (
+                        <ul className="mt-2 text-sm text-red-700 list-disc list-inside">
+                          {licenseVerification.issues.map((issue: string, index: number) => (
+                            <li key={index}>{issue}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {licenseVerification.recommendation && (
+                        <p className="mt-2 text-sm text-gray-700">{licenseVerification.recommendation}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
         </div>
       </section>
 
@@ -490,6 +654,37 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
           </div>
+
+          {/* Affichage du prix calculé */}
+          {watchedStartDate && watchedEndDate && (
+            <div className="md:col-span-2 mt-4">
+              {isCalculatingPrice ? (
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <p className="text-sm text-blue-700">Calcul du prix en cours avec l'IA...</p>
+                  </div>
+                </div>
+              ) : calculatedPrice ? (
+                <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-green-800">Prix calculé automatiquement</p>
+                      <p className="text-2xl font-bold text-green-700 mt-1">
+                        {(calculatedPrice / 100).toFixed(2)} €
+                      </p>
+                      {priceExplanation && (
+                        <p className="text-xs text-gray-600 mt-2">{priceExplanation}</p>
+                      )}
+                    </div>
+                    <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )}
         </div>
       </section>
 
