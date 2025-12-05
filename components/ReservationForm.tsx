@@ -26,7 +26,20 @@ const reservationSchema = z.object({
   licenseIssuingAuthority: z.string().min(2, 'Autorité émettrice requise'),
 
   // Informations ANTAI
-  licensePoints: z.number().min(0).max(12).optional(),
+  licensePoints: z.preprocess(
+    (val) => {
+      // Convertir les valeurs vides, null, undefined ou NaN en undefined
+      if (val === '' || val === null || val === undefined) {
+        return undefined;
+      }
+      const num = Number(val);
+      if (isNaN(num)) {
+        return undefined;
+      }
+      return num;
+    },
+    z.number().min(0).max(12).optional()
+  ),
   hasViolations: z.boolean(),
   violationsDetails: z.string().optional(),
 
@@ -356,7 +369,16 @@ export default function ReservationForm({ onSubmit, defaultAmount = 11000 }: Res
               type="number"
               min="0"
               max="12"
-              {...register('licensePoints', { valueAsNumber: true, setValueAs: (v) => v === '' ? undefined : Number(v) })}
+              {...register('licensePoints', { 
+                setValueAs: (v) => {
+                  // Convertir les valeurs vides ou invalides en undefined
+                  if (v === '' || v === null || v === undefined) {
+                    return undefined;
+                  }
+                  const num = Number(v);
+                  return isNaN(num) ? undefined : num;
+                }
+              })}
               placeholder="Laisser vide si permis étranger"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 bg-white"
             />
