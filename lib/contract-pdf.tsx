@@ -193,3 +193,4 @@ export const generateContractPDF = async (
 export const generateContractFileName = (reservationId: string): string => {
   return `contrat-location-${reservationId}.pdf`;
 };
+
