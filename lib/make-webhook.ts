@@ -14,6 +14,12 @@ interface ContractWebhookPayload {
   customerName: string;
   reservationData: ReservationFormData;
   contractHTML: string; // Contrat HTML complet à envoyer par email
+  licenseFileRectoBase64?: string; // Permis recto en base64
+  licenseFileRectoName?: string; // Nom du fichier recto
+  licenseFileRectoMimeType?: string; // Type MIME du fichier recto
+  licenseFileVersoBase64?: string; // Permis verso en base64
+  licenseFileVersoName?: string; // Nom du fichier verso
+  licenseFileVersoMimeType?: string; // Type MIME du fichier verso
 }
 
 export const sendEmailWebhook = async (

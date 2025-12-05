@@ -87,7 +87,7 @@ Deux webhooks Make.com sont nécessaires pour automatiser l'envoi d'emails et la
    Détails de la location :
    - Du {{1.reservationData.startDate}} à {{1.reservationData.startTime}}
    - Au {{1.reservationData.endDate}} à {{1.reservationData.endTime}}
-   - Montant payé : {{1.reservationData.amount}} {{1.reservationData.currency}}
+   - Montant : {{1.reservationData.amount}} {{1.reservationData.currency}}
    
    Merci pour votre confiance !
 
@@ -124,7 +124,7 @@ Deux webhooks Make.com sont nécessaires pour automatiser l'envoi d'emails et la
     "endDate": "2024-02-05",
     "startTime": "10:00",
     "endTime": "18:00",
-    "amount": 11000,
+    "amount": 110,
     "currency": "eur",
     "acceptsResponsibility": true
   }
@@ -151,7 +151,24 @@ Deux webhooks Make.com sont nécessaires pour automatiser l'envoi d'emails et la
    - **Body (HTML)** : Utilisez directement `{{1.contractHTML}}`
    - **Format** : HTML
 
-C'est tout ! Le contrat HTML contient toutes les informations nécessaires et peut être imprimé ou sauvegardé par le client.
+3. **Module 3 : Email au Propriétaire** (Optionnel mais recommandé)
+   - Type : Email > Send an Email (Gmail, Outlook, etc.)
+   - To : Votre adresse email (propriétaire)
+   - Subject : `Nouvelle réservation - Contrat à signer - {{1.reservationId}}`
+   - **Body** : Message personnalisé avec les détails de la réservation
+   - **Pièces jointes** : 
+     - **Fichier 1** : Permis recto
+       - Nom : `{{1.licenseFileRectoName}}`
+       - Contenu : Décoder `{{1.licenseFileRectoBase64}}` depuis base64
+       - Type MIME : `{{1.licenseFileRectoMimeType}}`
+     - **Fichier 2** : Permis verso
+       - Nom : `{{1.licenseFileVersoName}}`
+       - Contenu : Décoder `{{1.licenseFileVersoBase64}}` depuis base64
+       - Type MIME : `{{1.licenseFileVersoMimeType}}`
+
+**Note** : Dans Make.com, pour ajouter les pièces jointes, utilisez le module "Convert Base64 to File" ou "Create File from Base64" pour convertir les champs `licenseFileRectoBase64` et `licenseFileVersoBase64` en fichiers avant de les joindre à l'email.
+
+Le contrat HTML contient toutes les informations nécessaires et peut être imprimé ou sauvegardé par le client.
 
 #### Structure JSON reçue par le webhook :
 
@@ -163,6 +180,12 @@ C'est tout ! Le contrat HTML contient toutes les informations nécessaires et pe
   "customerName": "Jean Dupont",
   "timestamp": "2024-01-15T10:30:00.000Z",
   "contractHTML": "<!DOCTYPE html><html>...contenu HTML complet du contrat...</html>",
+  "licenseFileRectoBase64": "iVBORw0KGgoAAAANSUhEUgAA...",
+  "licenseFileRectoName": "permis_recto.jpg",
+  "licenseFileRectoMimeType": "image/jpeg",
+  "licenseFileVersoBase64": "iVBORw0KGgoAAAANSUhEUgAA...",
+  "licenseFileVersoName": "permis_verso.jpg",
+  "licenseFileVersoMimeType": "image/jpeg",
   "reservationData": {
     "firstName": "Jean",
     "lastName": "Dupont",
@@ -183,7 +206,7 @@ C'est tout ! Le contrat HTML contient toutes les informations nécessaires et pe
     "endDate": "2024-02-05",
     "startTime": "10:00",
     "endTime": "18:00",
-    "amount": 11000,
+    "amount": 110,
     "currency": "eur",
     "acceptsResponsibility": true
   }

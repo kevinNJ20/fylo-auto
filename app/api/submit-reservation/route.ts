@@ -152,8 +152,16 @@ export async function POST(request: NextRequest) {
         customerName: `${reservationData.firstName || ''} ${reservationData.lastName || ''}`.trim(),
         reservationData,
         contractHTML,
+        licenseFileRectoBase64: licenseFileRectoData?.base64,
+        licenseFileRectoName: licenseFileRectoData?.name,
+        licenseFileRectoMimeType: licenseFileRectoData?.mimeType,
+        licenseFileVersoBase64: licenseFileVersoData?.base64,
+        licenseFileVersoName: licenseFileVersoData?.name,
+        licenseFileVersoMimeType: licenseFileVersoData?.mimeType,
       });
       console.log('✓ Webhook contrat envoyé avec succès');
+      console.log('  - Recto:', licenseFileRectoData ? `${licenseFileRectoData.name} (${licenseFileRectoData.base64.length} caractères base64)` : 'non fourni');
+      console.log('  - Verso:', licenseFileVersoData ? `${licenseFileVersoData.name} (${licenseFileVersoData.base64.length} caractères base64)` : 'non fourni');
     } catch (error: any) {
       console.error('✗ Erreur webhook contrat:', error.message);
       // Ne pas bloquer si le webhook contrat échoue
